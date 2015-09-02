@@ -19,6 +19,7 @@ namespace SampleWebApi.Controllers
 
         [HttpGet]
         [Route("{id:int}")]
+        [EnableQuery(PageSize = 1)]
         public IHttpActionResult GetSingle(int id)
         {
             House house = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
