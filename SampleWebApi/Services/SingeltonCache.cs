@@ -25,6 +25,6 @@ namespace SampleWebApi.Services
             }
         }
 
-        public List<House> Houses { get; set; }
+        public List<HouseEntity> Houses { get; set; }
     }
 }

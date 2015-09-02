@@ -29,10 +29,10 @@ namespace SampleWebApi
 
             app.UseWebApi(config);
 
-            List<House> houses = new List<House>()
+            List<HouseEntity> houses = new List<HouseEntity>()
             {
-                new House() {City = "Town1", Id = 1, Street = "Street1", ZipCode = 1234},
-                new House() {City = "Town2", Id = 2, Street = "Street2", ZipCode = 5678}
+                new HouseEntity() {City = "Town1", Id = 1, Street = "Street1", ZipCode = 1234},
+                new HouseEntity() {City = "Town2", Id = 2, Street = "Street2", ZipCode = 5678}
             };
 
             Singleton.Instance.Houses = houses;

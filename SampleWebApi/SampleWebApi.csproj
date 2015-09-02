@@ -113,8 +113,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\HouseController.cs" />
-    <Compile Include="Models\House.cs" />
+    <Compile Include="Models\HouseEntity.cs" />
+    <Compile Include="Models\HouseDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\HouseMapper.cs" />
     <Compile Include="Services\SingeltonCache.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>

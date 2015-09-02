@@ -6,7 +6,7 @@ using System.Web;
 
 namespace SampleWebApi.Models
 {
-    public class House
+    public class HouseDto
     {
         public int Id { get; set; }
 

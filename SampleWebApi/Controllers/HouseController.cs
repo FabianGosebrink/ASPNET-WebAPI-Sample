@@ -10,11 +10,18 @@ namespace SampleWebApi.Controllers
     [RoutePrefix("api/house")]
     public class HouseController : ApiController
     {
+        private readonly HouseMapper _houseMapper;
+
+        public HouseController()
+        {
+            _houseMapper = new HouseMapper();
+        }
+
         [HttpGet]
         [EnableQuery(PageSize = 50)]
         public IHttpActionResult Get()
         {
-            return Ok(Singleton.Instance.Houses.AsQueryable());
+            return Ok(Singleton.Instance.Houses.Select(x => _houseMapper.MapToDto(x)));
         }
 
         [HttpGet]
@@ -22,20 +29,20 @@ namespace SampleWebApi.Controllers
         [EnableQuery(PageSize = 1)]
         public IHttpActionResult GetSingle(int id)
         {
-            House house = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            if (house == null)
+            if (houseEntity == null)
             {
                 return NotFound();
             }
 
-            return Ok(house);
+            return Ok(_houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPost]
-        public IHttpActionResult Create([FromBody] House house)
+        public IHttpActionResult Create([FromBody] HouseDto houseDto)
         {
-            if (house == null)
+            if (houseDto == null)
             {
                 return BadRequest();
             }
@@ -45,24 +52,18 @@ namespace SampleWebApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            House houseToAdd = new House
-            {
-                Id = !Singleton.Instance.Houses.Any() ? 1 : Singleton.Instance.Houses.Max(x => x.Id) + 1,
-                City = house.City,
-                Street = house.Street, 
-                ZipCode = house.ZipCode
-            };
+            HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
 
-            Singleton.Instance.Houses.Add(houseToAdd);
+            Singleton.Instance.Houses.Add(houseEntity);
 
-            return CreatedAtRoute("DefaultApi", new { id = houseToAdd.Id }, houseToAdd);
+            return CreatedAtRoute("DefaultApi", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPut]
         [Route("{id:int}")]
-        public IHttpActionResult Update(int id, [FromBody] House newHouse)
+        public IHttpActionResult Update(int id, [FromBody] HouseDto houseDto)
         {
-            if (newHouse == null)
+            if (houseDto == null)
             {
                 return BadRequest();
             }
@@ -72,34 +73,34 @@ namespace SampleWebApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            House houseToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            if (houseToUpdate == null)
+            if (houseEntityToUpdate == null)
             {
                 return NotFound();
             }
 
-            houseToUpdate.ZipCode = newHouse.ZipCode;
-            houseToUpdate.Street = newHouse.Street;
-            houseToUpdate.City = newHouse.City;
+            houseEntityToUpdate.ZipCode = houseDto.ZipCode;
+            houseEntityToUpdate.Street = houseDto.Street;
+            houseEntityToUpdate.City = houseDto.City;
 
             //Update to Database --> Is singleton in this case....
 
-            return Ok(houseToUpdate);
+            return Ok(_houseMapper.MapToDto(houseEntityToUpdate));
         }
 
         [HttpDelete]
         [Route("{id:int}")]
         public IHttpActionResult Delete(int id)
         {
-            House houseToDelete = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntityToDelete = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            if (houseToDelete == null)
+            if (houseEntityToDelete == null)
             {
                 return NotFound();
             }
 
-            Singleton.Instance.Houses.Remove(houseToDelete);
+            Singleton.Instance.Houses.Remove(houseEntityToDelete);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
