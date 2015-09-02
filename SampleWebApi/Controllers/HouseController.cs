@@ -89,6 +89,36 @@ namespace SampleWebApi.Controllers
             return Ok(_houseMapper.MapToDto(houseEntityToUpdate));
         }
 
+        [HttpPatch]
+        [Route("{id:int}")]
+        public IHttpActionResult Patch(int id, Delta<HouseDto> houseDto)
+        {
+            if (houseDto == null)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+
+            if (houseEntityToUpdate == null)
+            {
+                return NotFound();
+            }
+
+            HouseDto existingHouse = _houseMapper.MapToDto(houseEntityToUpdate);
+            houseDto.Patch(existingHouse);
+
+            int index = Singleton.Instance.Houses.FindIndex(x => x.Id == id);
+            Singleton.Instance.Houses[index] = _houseMapper.MapToEntity(existingHouse);
+
+            return Ok(existingHouse);
+        }
+
         [HttpDelete]
         [Route("{id:int}")]
         public IHttpActionResult Delete(int id)

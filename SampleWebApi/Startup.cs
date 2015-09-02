@@ -32,7 +32,9 @@ namespace SampleWebApi
             List<HouseEntity> houses = new List<HouseEntity>()
             {
                 new HouseEntity() {City = "Town1", Id = 1, Street = "Street1", ZipCode = 1234},
-                new HouseEntity() {City = "Town2", Id = 2, Street = "Street2", ZipCode = 5678}
+                new HouseEntity() {City = "Town2", Id = 2, Street = "Street2", ZipCode = 5678},
+                new HouseEntity() {City = "Town3", Id = 3, Street = "Street3", ZipCode = 9012},
+                new HouseEntity() {City = "Town4", Id = 4, Street = "Street4", ZipCode = 3456}
             };
 
             Singleton.Instance.Houses = houses;
