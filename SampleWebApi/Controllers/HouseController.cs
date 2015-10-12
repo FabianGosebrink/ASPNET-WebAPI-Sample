@@ -22,7 +22,7 @@ namespace SampleWebApi.Controllers
         }
 
         [HttpGet]
-        [EnableQuery(PageSize = 50)]
+        [EnableQuery(PageSize = MaxPageSize)]
         [Route("")]
         public IHttpActionResult Get(int page = 1, int pageSize = MaxPageSize)
         {
@@ -36,7 +36,7 @@ namespace SampleWebApi.Controllers
                 totalCount = Singleton.Instance.Houses.Count
                 // Add more headers here if you want...
                 // Link to next and previous page etc.
-                // Also see OData-Options for thiss
+                // Also see OData-Options for this
             };
 
             List<HouseEntity> result = Singleton.Instance.Houses
