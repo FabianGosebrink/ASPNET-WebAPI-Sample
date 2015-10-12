@@ -13,6 +13,7 @@ namespace SampleWebApi.Controllers
     [RoutePrefix("api/house")]
     public class HouseController : ApiController
     {
+        const int MaxPageSize = 10;
         private readonly HouseMapper _houseMapper;
 
         public HouseController()
@@ -23,17 +24,29 @@ namespace SampleWebApi.Controllers
         [HttpGet]
         [EnableQuery(PageSize = 50)]
         [Route("")]
-        public IHttpActionResult Get()
+        public IHttpActionResult Get(int page = 1, int pageSize = MaxPageSize)
         {
+            if(pageSize > MaxPageSize)
+            {
+                pageSize = MaxPageSize;
+            }
+
             var paginationHeader = new
             {
                 totalCount = Singleton.Instance.Houses.Count
                 // Add more headers here if you want...
+                // Link to next and previous page etc.
+                // Also see OData-Options for thiss
             };
+
+            List<HouseEntity> result = Singleton.Instance.Houses
+                    .Skip(pageSize * (page - 1))
+                    .Take(pageSize)
+                    .ToList();
 
             HttpContext.Current.Response.AppendHeader("X-Pagination", JsonConvert.SerializeObject(paginationHeader));
 
-            return Ok(Singleton.Instance.Houses.Select(x => _houseMapper.MapToDto(x)));
+            return Ok(result.Select(x => _houseMapper.MapToDto(x)));
         }
 
         [HttpGet]
