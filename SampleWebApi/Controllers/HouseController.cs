@@ -26,7 +26,7 @@ namespace SampleWebApi.Controllers
         [Route("")]
         public IHttpActionResult Get(int page = 1, int pageSize = MaxPageSize)
         {
-            if(pageSize > MaxPageSize)
+            if (pageSize > MaxPageSize)
             {
                 pageSize = MaxPageSize;
             }
@@ -50,13 +50,13 @@ namespace SampleWebApi.Controllers
         }
 
         [HttpGet]
-        [Route("{id:int}")]
+        [Route("{id:int}", Name = "GetSingleHouse")]
         [EnableQuery(PageSize = 1)]
         public IHttpActionResult GetSingle(int id)
         {
             HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            if(houseEntity == null)
+            if (houseEntity == null)
             {
                 return NotFound();
             }
@@ -68,12 +68,12 @@ namespace SampleWebApi.Controllers
         [Route("")]
         public IHttpActionResult Create([FromBody] HouseDto houseDto)
         {
-            if(houseDto == null)
+            if (houseDto == null)
             {
                 return BadRequest();
             }
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
@@ -82,26 +82,26 @@ namespace SampleWebApi.Controllers
 
             Singleton.Instance.Houses.Add(houseEntity);
 
-            return CreatedAtRoute("DefaultApi", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
+            return CreatedAtRoute("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPut]
         [Route("{id:int}")]
         public IHttpActionResult Update(int id, [FromBody] HouseDto houseDto)
         {
-            if(houseDto == null)
+            if (houseDto == null)
             {
                 return BadRequest();
             }
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
             HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            if(houseEntityToUpdate == null)
+            if (houseEntityToUpdate == null)
             {
                 return NotFound();
             }
@@ -119,19 +119,19 @@ namespace SampleWebApi.Controllers
         [Route("{id:int}")]
         public IHttpActionResult Patch(int id, Delta<HouseDto> houseDto)
         {
-            if(houseDto == null)
+            if (houseDto == null)
             {
                 return BadRequest();
             }
 
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
             HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            if(houseEntityToUpdate == null)
+            if (houseEntityToUpdate == null)
             {
                 return NotFound();
             }
@@ -151,7 +151,7 @@ namespace SampleWebApi.Controllers
         {
             HouseEntity houseEntityToDelete = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
 
-            if(houseEntityToDelete == null)
+            if (houseEntityToDelete == null)
             {
                 return NotFound();
             }
