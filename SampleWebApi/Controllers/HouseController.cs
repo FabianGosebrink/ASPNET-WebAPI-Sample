@@ -6,6 +6,7 @@ using System.Web.Http;
 using System.Web.Http.OData;
 using Newtonsoft.Json;
 using SampleWebApi.Models;
+using SampleWebApi.Repositories;
 using SampleWebApi.Services;
 
 namespace SampleWebApi.Controllers
@@ -13,12 +14,14 @@ namespace SampleWebApi.Controllers
     [RoutePrefix("api/house")]
     public class HouseController : ApiController
     {
+        private readonly IHouseRepository _houseRepository;
         const int MaxPageSize = 10;
-        private readonly HouseMapper _houseMapper;
+        private readonly IHouseMapper _houseMapper;
 
-        public HouseController()
+        public HouseController(IHouseRepository houseRepository, IHouseMapper houseMapper)
         {
-            _houseMapper = new HouseMapper();
+            _houseRepository = houseRepository;
+            _houseMapper = houseMapper;
         }
 
         [HttpGet]
@@ -33,13 +36,13 @@ namespace SampleWebApi.Controllers
 
             var paginationHeader = new
             {
-                totalCount = Singleton.Instance.Houses.Count
+                totalCount = _houseRepository.GetAll().Count
                 // Add more headers here if you want...
                 // Link to next and previous page etc.
                 // Also see OData-Options for this
             };
 
-            List<HouseEntity> result = Singleton.Instance.Houses
+            List<HouseEntity> result = _houseRepository.GetAll()
                     .Skip(pageSize * (page - 1))
                     .Take(pageSize)
                     .ToList();
@@ -54,7 +57,7 @@ namespace SampleWebApi.Controllers
         [EnableQuery(PageSize = 1)]
         public IHttpActionResult GetSingle(int id)
         {
-            HouseEntity houseEntity = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntity = _houseRepository.GetSingle(id);
 
             if (houseEntity == null)
             {
@@ -80,8 +83,8 @@ namespace SampleWebApi.Controllers
 
             HouseEntity houseEntity = _houseMapper.MapToEntity(houseDto);
 
-            Singleton.Instance.Houses.Add(houseEntity);
-
+            _houseRepository.Add(houseEntity);
+            
             return CreatedAtRoute("GetSingleHouse", new { id = houseEntity.Id }, _houseMapper.MapToDto(houseEntity));
         }
 
@@ -99,7 +102,7 @@ namespace SampleWebApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntityToUpdate = _houseRepository.GetSingle(id);
 
             if (houseEntityToUpdate == null)
             {
@@ -110,9 +113,9 @@ namespace SampleWebApi.Controllers
             houseEntityToUpdate.Street = houseDto.Street;
             houseEntityToUpdate.City = houseDto.City;
 
-            //Update to Database --> Is singleton in this case....
+            HouseEntity houseEntity = _houseRepository.Update(houseEntityToUpdate);
 
-            return Ok(_houseMapper.MapToDto(houseEntityToUpdate));
+            return Ok(_houseMapper.MapToDto(houseEntity));
         }
 
         [HttpPatch]
@@ -129,7 +132,7 @@ namespace SampleWebApi.Controllers
                 return BadRequest(ModelState);
             }
 
-            HouseEntity houseEntityToUpdate = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntityToUpdate = _houseRepository.GetSingle(id);
 
             if (houseEntityToUpdate == null)
             {
@@ -139,24 +142,23 @@ namespace SampleWebApi.Controllers
             HouseDto existingHouse = _houseMapper.MapToDto(houseEntityToUpdate);
             houseDto.Patch(existingHouse);
 
-            int index = Singleton.Instance.Houses.FindIndex(x => x.Id == id);
-            Singleton.Instance.Houses[index] = _houseMapper.MapToEntity(existingHouse);
+            HouseEntity patched = _houseRepository.Update(_houseMapper.MapToEntity(existingHouse));
 
-            return Ok(existingHouse);
+            return Ok(_houseMapper.MapToDto(patched));
         }
 
         [HttpDelete]
         [Route("{id:int}")]
         public IHttpActionResult Delete(int id)
         {
-            HouseEntity houseEntityToDelete = Singleton.Instance.Houses.FirstOrDefault(x => x.Id == id);
+            HouseEntity houseEntityToDelete = _houseRepository.GetSingle(id);
 
             if (houseEntityToDelete == null)
             {
                 return NotFound();
             }
 
-            Singleton.Instance.Houses.Remove(houseEntityToDelete);
+            _houseRepository.Delete(id);
 
             return StatusCode(HttpStatusCode.NoContent);
         }

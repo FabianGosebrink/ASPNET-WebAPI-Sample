@@ -4,9 +4,13 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.OData.Extensions;
 using Microsoft.Owin;
+using Ninject;
+using Ninject.Web.Common;
 using Owin;
 using SampleWebApi.Models;
+using SampleWebApi.Repositories;
 using SampleWebApi.Services;
+using WebApiContrib.IoC.Ninject;
 
 [assembly: OwinStartup(typeof(SampleWebApi.Startup))]
 
@@ -16,7 +20,11 @@ namespace SampleWebApi
     {
         public void Configuration(IAppBuilder app)
         {
-            var config = new HttpConfiguration();
+            var config = new HttpConfiguration
+            {
+                DependencyResolver = new NinjectResolver(CreateKernel())
+            };
+
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute(
@@ -28,16 +36,16 @@ namespace SampleWebApi
             config.AddODataQueryFilter();
 
             app.UseWebApi(config);
+        }
 
-            List<HouseEntity> houses = new List<HouseEntity>()
-            {
-                new HouseEntity() {City = "Town1", Id = 1, Street = "Street1", ZipCode = 1234},
-                new HouseEntity() {City = "Town2", Id = 2, Street = "Street2", ZipCode = 5678},
-                new HouseEntity() {City = "Town3", Id = 3, Street = "Street3", ZipCode = 9012},
-                new HouseEntity() {City = "Town4", Id = 4, Street = "Street4", ZipCode = 3456}
-            };
+        public static IKernel CreateKernel()
+        {
+            var kernel = new StandardKernel();
 
-            Singleton.Instance.Houses = houses;
+            kernel.Bind<IHouseRepository>().ToConstant(new HouseRepository());
+            kernel.Bind<IHouseMapper>().To<HouseMapper>().InRequestScope();
+
+            return kernel;
         }
     }
 }
