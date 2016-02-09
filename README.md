@@ -1,4 +1,4 @@
-# SampleWebApi
+# Sample ASP.NET WebApi
 A simple Asp.Net WebAPI with CRUD Operations, using modelstate, OData enabled &amp; returning correct statuscodes
 
 I used mapper here to map from a DTO to an entity to show how to handle this case. 
